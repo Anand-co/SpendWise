@@ -1,0 +1,10 @@
+package com.spendwise.spendwise.controller;
+import java.math.BigDecimal; import java.util.List; import java.util.Map; import jakarta.validation.Valid; import org.springframework.http.HttpStatus; import org.springframework.security.core.Authentication; import org.springframework.web.bind.annotation.*; import com.spendwise.spendwise.dto.BudgetRequest; import com.spendwise.spendwise.entity.Budget; import com.spendwise.spendwise.service.BudgetService;
+@RestController @RequestMapping("/api/budgets") public class BudgetController {private final BudgetService service;public BudgetController(BudgetService service){this.service=service;}
+ @GetMapping public List<Budget> getAll(Authentication a){return service.getAll(a.getName());}
+ @GetMapping("/month/{month}") public List<Budget> getByMonth(@PathVariable String month,Authentication a){return service.getByMonth(month,a.getName());}
+ @GetMapping("/month/{month}/progress") public List<Map<String,Object>> progress(@PathVariable String month,Authentication a){return service.getByMonth(month,a.getName()).stream().map(b->{BigDecimal spent=service.getSpent(b);BigDecimal remaining=b.getMonthlyLimit().subtract(spent);double percent=spent.multiply(BigDecimal.valueOf(100)).divide(b.getMonthlyLimit(),2,java.math.RoundingMode.HALF_UP).doubleValue();return Map.<String,Object>of("id",b.getId(),"category",b.getCategory(),"monthStart",b.getMonthStart(),"monthlyLimit",b.getMonthlyLimit(),"spent",spent,"remaining",remaining,"usedPercentage",percent,"overBudget",spent.compareTo(b.getMonthlyLimit())>0);}).toList();}
+ @PostMapping @ResponseStatus(HttpStatus.CREATED) public Budget create(@Valid @RequestBody BudgetRequest request,Authentication a){return service.create(request,a.getName());}
+ @PutMapping("/{id}") public Budget update(@PathVariable Long id,@Valid @RequestBody BudgetRequest request,Authentication a){return service.update(id,request,a.getName());}
+ @DeleteMapping("/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) public void delete(@PathVariable Long id,Authentication a){service.delete(id,a.getName());}
+}

@@ -1,0 +1,22 @@
+
+# Java / Maven
+spendwise_backend/target/
+spendwise_backend/.mvn/wrapper/maven-wrapper.jar
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+**/application-local.properties
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
